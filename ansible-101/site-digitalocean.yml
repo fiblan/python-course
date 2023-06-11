@@ -115,8 +115,8 @@
   tags:
   - setup
   vars:
-  - ansible_python_interpreter: /usr/bin/python3
-  - ansible_user: root
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_user: root
   environment:
   - ANSIBLE_HOST_KEY_CHECKING: False
   tasks:
