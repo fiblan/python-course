@@ -18,27 +18,48 @@
   gather_facts: false
   vars:
     oauth_token: "{{ lookup('ansible.builtin.env', 'DO_API_TOKEN') }}"
-    ssh_pubkeys:
-      - rpolli-ed25519
-      - esavo-rsa
-      - dabbasciano-rsa
+    ssh_pubkeys: []
+    github_usernames:
+      - fiblan
     droplet_names:
       - deleteme-1
-      - deleteme-2
 
   tasks:
+  - name: Get public keys from github
+    uri:
+      url: "https://github.com/{{ item }}.keys"
+      return_content: yes
+    register: github_keys
+    loop: "{{ github_usernames }}"
+
+  - name: Create digitalocean keys
+    community.digitalocean.digital_ocean_sshkey:
+      oauth_token: "{{ oauth_token }}"
+      name: "GitHub key for {{ item.item }}"
+      ssh_pub_key: "{{ item.content }}"
+      state: present
+    loop: "{{ github_keys.results }}"
+    register: result
+      
   - name: Retrieve ssh key id.
     community.digitalocean.digital_ocean_sshkey_info:
       oauth_token: "{{ oauth_token }}"
     register: ssh_keys
     check_mode: no
 
+  - debug:
+      var: ssh_keys
+
+  - name: Set Do Keys with all keys
+    set_fact:
+      do_keys: "{{ ssh_keys.data | map(attribute='fingerprint') | list }}"
+        
   - name: Set facts based on the gathered information
     set_fact:
-      do_key: "{{ do_key | default([]) + ssh_keys | community.general.json_query(search_query) | default(item) }}"
+      do_keys: "{{ do_keys | default([]) | community.general.json_query(search_query) | default(item) }}"
     vars:
       search_query: "data[?name=='{{ item }}'].fingerprint"
-      # search_query: "data[?(@.name.match('{{ ssh_pubkeys | join ('|') }}'))].fingerprint"
+      #search_query: "data[?(@.name.match('{{ ssh_pubkeys | join ('|') }}'))].fingerprint"
       #
       # This should be the correct query, but Ansible fatals:
       #
@@ -50,7 +71,7 @@
       state: present
       name: "{{item}}"
       unique_name: yes
-      ssh_keys: "{{ do_key }}"
+      ssh_keys: "{{ do_keys }}"
       size: s-2vcpu-4gb
       region: fra1
       image: docker-18-04
@@ -132,8 +153,8 @@
 
     - name: Download course
       git:
-        repo: https://github.com/ioggstream/python-course.git
-        version: ansible-2023
+        repo: https://github.com/fiblan/python-course.git
+        version: git-101-2023-fib
         dest: /root/python-course
       ignore_errors: true
 
