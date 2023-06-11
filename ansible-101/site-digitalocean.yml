@@ -23,6 +23,7 @@
       - fiblan
     droplet_names:
       - deleteme-1
+      - deleteme-2
 
   tasks:
   - name: Get public keys from github
@@ -160,7 +161,7 @@
 
     - name: Make it
       shell: |
-        make course
+        EXTERNAL_COURSES=git-101 make course
       args:
        chdir: /root/python-course/ansible-101
       register: output
