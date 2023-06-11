@@ -16,7 +16,7 @@ endif
 
 
 course: .prepare
-	docker-compose scale course=1 web=2 bastion=1
+	docker-compose up --scale course=1 web=2 bastion=1
 	docker-compose logs course | grep token | sed -e "s/0.0.0.0/$(MAIN_IP)/g"
 
 clean:
@@ -36,7 +36,7 @@ test:
 	docker exec -ti ansible101_dev_1 bash -c ' (cd /notebooks; ./cleanup.sh ) '
 
 dev: .prepare
-	docker-compose scale dev=1 web=2 bastion=1
+	docker-compose up --scale dev=1 web=2 bastion=1
 	docker-compose logs dev | grep token | sed -e "s/0.0.0.0/$(MAIN_IP)/g" | sed -e "s/(sysadminpy or 127.0.0.1)/$(MAIN_IP)/g"
 
 .prepare:
