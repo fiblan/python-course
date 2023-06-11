@@ -16,7 +16,7 @@ endif
 
 
 course: .prepare
-	docker-compose up --scale course=1 web=2 bastion=1
+	docker-compose up course
 	docker-compose logs course | grep token | sed -e "s/0.0.0.0/$(MAIN_IP)/g"
 
 clean:
