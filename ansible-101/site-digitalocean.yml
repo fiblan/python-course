@@ -121,6 +121,10 @@
   environment:
   - ANSIBLE_HOST_KEY_CHECKING: False
   tasks:
+  - name: Wait for SSH connection
+    wait_for_connection:
+      delay: 10
+      timeout: 300
   - ping:
   - block:
     - name: Automatic shutdown crontab entry
@@ -131,6 +135,26 @@
         state: present
         disabled: false
         job: "/sbin/shutdown -r now"
+
+    - name: Install code-server
+      shell: curl -fsSL https://code-server.dev/install.sh | sh
+      become: true
+
+    - name: Open port 9080 with UFW
+      ufw:
+        rule: allow
+        port: 9080
+
+    - name: Create user "coder"
+      user:
+        name: coder
+        state: present
+        createhome: yes
+
+    - name: Run code-server as user "coder" in the background
+      shell: PASSWORD=git-101 code-server --bind-addr 0.0.0.0:9080 &
+      become: true
+      become_user: coder
 
     - name: Docker should listen on localhost.
       lineinfile:

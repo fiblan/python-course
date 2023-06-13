@@ -17,10 +17,10 @@ endif
 
 course: .prepare
 	docker-compose up -d course
-	mkdir -p tmp/code
-	ufw allow 9080
-	curl -fsSL https://code-server.dev/install.sh | sh
-	PASSWORD=git-101 code-server --bind-addr 0.0.0.0:9080 tmp/code &
+#	mkdir -p tmp/code
+#	ufw allow 9080
+#	curl -fsSL https://code-server.dev/install.sh | sh
+#	PASSWORD=git-101 code-server --bind-addr 0.0.0.0:9080 tmp/code &
 	docker-compose logs course | grep token | sed -e "s/0.0.0.0/$(MAIN_IP)/g"
 
 clean:
