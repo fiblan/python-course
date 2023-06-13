@@ -23,7 +23,6 @@
       - fiblan
     droplet_names:
       - deleteme-1
-      - deleteme-2
 
   tasks:
   - name: Get public keys from github
@@ -118,8 +117,8 @@
   vars:
     ansible_python_interpreter: /usr/bin/python3
     ansible_user: root
-  environment:
-  - ANSIBLE_HOST_KEY_CHECKING: False
+    ansible_env:
+      ANSIBLE_HOST_KEY_CHECKING: False
   tasks:
   - name: Wait for SSH connection
     wait_for_connection:
